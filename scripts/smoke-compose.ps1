@@ -36,6 +36,9 @@ $started = $false
 try {
   $started = $true
   docker compose -p $projectName up -d --build
+  if ($LASTEXITCODE -ne 0) {
+    throw "Failed to start Compose services."
+  }
 
   $deadline = (Get-Date).AddSeconds($TimeoutSeconds)
   $ready = $false
