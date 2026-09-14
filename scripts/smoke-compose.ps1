@@ -9,9 +9,9 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
-$curlCommand = Get-Command curl.exe -ErrorAction SilentlyContinue
+$curlCommand = Get-Command curl.exe -ErrorAction SilentlyContinue | Select-Object -First 1
 if (-not $curlCommand) {
-  $curlCommand = Get-Command curl -CommandType Application -ErrorAction Stop
+  $curlCommand = Get-Command curl -CommandType Application -ErrorAction Stop | Select-Object -First 1
 }
 $env:ATLAS_BACKEND_PORT = $BackendPort
 $env:ATLAS_FRONTEND_PORT = $FrontendPort
@@ -62,21 +62,21 @@ try {
     throw "Compose services did not reach the expected runtime state within $TimeoutSeconds seconds."
   }
 
-  $page = & $curlCommand.Source --fail --silent "http://localhost:$FrontendPort/"
-  $health = & $curlCommand.Source --fail --silent "http://localhost:$FrontendPort/api/health" | ConvertFrom-Json
+  $page = & $curlCommand.Path --fail --silent "http://localhost:$FrontendPort/"
+  $health = & $curlCommand.Path --fail --silent "http://localhost:$FrontendPort/api/health" | ConvertFrom-Json
   $protectedRouteStatus = "200"
   if ($Authentication) {
     $responseFile = [IO.Path]::GetTempFileName()
     try {
-      $protectedRouteStatus = & $curlCommand.Source --silent --output $responseFile --write-out "%{http_code}" "http://localhost:$FrontendPort/api/docker/containers"
+      $protectedRouteStatus = & $curlCommand.Path --silent --output $responseFile --write-out "%{http_code}" "http://localhost:$FrontendPort/api/docker/containers"
     } finally {
       Remove-Item $responseFile -Force
     }
   }
-  $containers = & $curlCommand.Source --fail --silent @apiKeyHeader "http://localhost:$FrontendPort/api/docker/containers"
-  $targets = & $curlCommand.Source --fail --silent "http://localhost:$PrometheusPort/api/v1/targets" | ConvertFrom-Json
-  $rules = & $curlCommand.Source --fail --silent "http://localhost:$PrometheusPort/api/v1/rules" | ConvertFrom-Json
-  $dashboard = & $curlCommand.Source --fail --silent --user "${grafanaUser}:${grafanaPassword}" "http://localhost:$GrafanaPort/api/dashboards/uid/atlas-overview" | ConvertFrom-Json
+  $containers = & $curlCommand.Path --fail --silent @apiKeyHeader "http://localhost:$FrontendPort/api/docker/containers"
+  $targets = & $curlCommand.Path --fail --silent "http://localhost:$PrometheusPort/api/v1/targets" | ConvertFrom-Json
+  $rules = & $curlCommand.Path --fail --silent "http://localhost:$PrometheusPort/api/v1/rules" | ConvertFrom-Json
+  $dashboard = & $curlCommand.Path --fail --silent --user "${grafanaUser}:${grafanaPassword}" "http://localhost:$GrafanaPort/api/dashboards/uid/atlas-overview" | ConvertFrom-Json
   $hasApplicationRoot = [regex]::IsMatch([string]$page, [regex]::Escape('<div id="root"></div>'))
   $hasHealthyProxy = $health.status -eq "ok"
   $hasAuthenticationBoundary = -not $Authentication -or $protectedRouteStatus -eq "401"
