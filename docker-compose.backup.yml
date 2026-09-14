@@ -1,0 +1,4 @@
+services:
+  backend:
+    volumes:
+      - ${ATLAS_BACKUP_HOST_PATH:?Set ATLAS_BACKUP_HOST_PATH to the backup directory}:/mnt/atlas-backups:ro

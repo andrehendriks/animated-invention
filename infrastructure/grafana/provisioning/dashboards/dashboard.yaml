@@ -1,0 +1,11 @@
+apiVersion: 1
+
+providers:
+  - name: Atlas
+    orgId: 1
+    folder: Atlas
+    type: file
+    disableDeletion: true
+    editable: false
+    options:
+      path: /etc/grafana/provisioning/dashboards

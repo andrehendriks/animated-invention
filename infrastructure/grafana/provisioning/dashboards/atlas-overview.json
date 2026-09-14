@@ -1,0 +1,49 @@
+{
+  "annotations": {"list": []},
+  "editable": false,
+  "panels": [
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}, {"color": "green", "value": 1}]}}},
+      "gridPos": {"h": 8, "w": 8, "x": 0, "y": 0},
+      "id": 1,
+      "options": {"colorMode": "background", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}},
+      "targets": [{"expr": "up{job=\"atlas-backend\"}", "refId": "A"}],
+      "title": "Atlas backend availability",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"unit": "percentunit"}},
+      "gridPos": {"h": 8, "w": 8, "x": 8, "y": 0},
+      "id": 2,
+      "targets": [{"expr": "rate(process_cpu_seconds_total{job=\"atlas-backend\"}[5m])", "legendFormat": "CPU", "refId": "A"}],
+      "title": "Atlas backend CPU",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"unit": "bytes"}},
+      "gridPos": {"h": 8, "w": 8, "x": 16, "y": 0},
+      "id": 3,
+      "targets": [{"expr": "process_resident_memory_bytes{job=\"atlas-backend\"}", "legendFormat": "Memory", "refId": "A"}],
+      "title": "Atlas backend memory",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"decimals": 0, "min": 0}},
+      "gridPos": {"h": 8, "w": 8, "x": 0, "y": 8},
+      "id": 4,
+      "options": {"colorMode": "background", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}},
+      "targets": [{"expr": "count(ALERTS{alertstate=\"firing\",job=\"atlas-backend\"}) or vector(0)", "refId": "A"}],
+      "title": "Active Atlas backend alerts",
+      "type": "stat"
+    }
+  ],
+  "schemaVersion": 39,
+  "tags": ["atlas", "backend"],
+  "title": "Atlas overview",
+  "uid": "atlas-overview",
+  "version": 1
+}

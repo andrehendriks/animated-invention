@@ -1,0 +1,55 @@
+name: Verify Atlas
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build backend test image
+        run: docker build --tag atlas-backend-test ./backend
+      - name: Run backend tests
+        run: docker run --rm atlas-backend-test pytest -q
+      - name: Render Kubernetes manifests
+        run: docker run --rm --volume "$PWD/infrastructure/kubernetes:/manifests:ro" atlas-backend-test kubectl kustomize /manifests
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run locked frontend build and tests
+        run: docker build --target test --tag atlas-frontend-test ./frontend
+
+  prometheus:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Prometheus image
+        run: docker build --tag atlas-prometheus-test ./infrastructure/prometheus
+      - name: Validate configuration and alert rules
+        run: |
+          docker run --rm --entrypoint promtool atlas-prometheus-test check config /etc/prometheus/prometheus.yml
+          docker run --rm --entrypoint promtool --volume "$PWD/infrastructure/prometheus/tests:/tests:ro" \
+            atlas-prometheus-test test rules /tests/atlas_alerts.yml
+
+  compose-smoke:
+    needs: [backend, frontend, prometheus]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare diagnostic runtime access
+        run: |
+          mkdir --parents "$HOME/.kube"
+          touch "$HOME/.kube/config"
+          echo "ATLAS_DOCKER_GID=$(stat --format='%g' /var/run/docker.sock)" >> "$GITHUB_ENV"
+      - name: Run isolated Compose smoke test
+        shell: pwsh
+        run: ./scripts/smoke-compose.ps1 -Authentication

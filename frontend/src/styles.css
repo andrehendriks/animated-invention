@@ -1,0 +1,13 @@
+:root { font-family: Inter, system-ui, sans-serif; color: #e8edf4; background: #101725; }
+* { box-sizing: border-box; } body { margin: 0; } main { min-height: 100vh; display: grid; grid-template-columns: 15rem 1fr; }
+aside { padding: 1.5rem; background: #151e2f; border-right: 1px solid #2b3851; } h1 { color: #63d7ff; letter-spacing: .12em; margin: 0; }
+aside p { color: #9cabc4; font-size: .85rem; margin-bottom: 2rem; } button { cursor: pointer; border: 0; border-radius: .4rem; padding: .65rem .9rem; background: #287bb5; color: white; }
+aside button { display: block; width: 100%; margin: .5rem 0; text-align: left; background: transparent; } aside button:hover { background: #263751; }
+section { padding: 2rem; max-width: 1100px; width: 100%; margin: 0 auto; } header { display: flex; justify-content: space-between; align-items: center; gap: 1rem; color: #72d59a; } header form { max-width: 28rem; }
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: 1rem; margin: 2rem 0; } article, pre { background: #19243a; border: 1px solid #2b3851; border-radius: .5rem; padding: 1rem; }
+article h2 { margin-top: 0; text-transform: capitalize; } strong { color: #72d59a; } .chat { margin-top: 3rem; } form { display: flex; gap: .6rem; }
+input, textarea { flex: 1; min-width: 0; padding: .75rem; border: 1px solid #40516d; border-radius: .4rem; background: #0d1421; color: inherit; }
+textarea { min-height: 10rem; resize: vertical; }
+.chat article { margin-top: 1rem; }.error { margin: 1rem 0; padding: .8rem; background: #542d38; border-radius: .4rem; } pre { overflow: auto; }
+.history { display: grid; gap: 1rem; }.history article { margin: 0; }.history pre { margin-bottom: 0; }
+@media (max-width: 700px) { main { grid-template-columns: 1fr; } aside { border-right: 0; border-bottom: 1px solid #2b3851; } aside button { display: inline-block; width: auto; } section { padding: 1rem; } }

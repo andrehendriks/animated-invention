@@ -1,0 +1,4 @@
+services:
+  backend:
+    volumes:
+      - ${ATLAS_SYNOLOGY_HOST_PATH:?Set ATLAS_SYNOLOGY_HOST_PATH to the parent directory containing mounted Synology shares}:/mnt/synology:ro

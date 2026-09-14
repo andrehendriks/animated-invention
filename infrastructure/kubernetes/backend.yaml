@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: atlas-backend
+  namespace: atlas
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: atlas-backend
+  template:
+    metadata:
+      labels:
+        app: atlas-backend
+    spec:
+      serviceAccountName: atlas-diagnostics
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      containers:
+        - name: backend
+          image: ghcr.io/andrehendriks/animated-invention/backend:latest
+          ports:
+            - containerPort: 8000
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          envFrom:
+            - secretRef:
+                name: atlas-secrets
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 20
+            timeoutSeconds: 3
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /api/ready
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: atlas-data
+              mountPath: /data
+      volumes:
+        - name: atlas-data
+          persistentVolumeClaim:
+            claimName: atlas-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+  namespace: atlas
+spec:
+  selector:
+    app: atlas-backend
+  ports:
+    - port: 8000
+      targetPort: 8000

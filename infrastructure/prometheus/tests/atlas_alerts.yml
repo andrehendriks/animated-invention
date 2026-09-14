@@ -1,0 +1,34 @@
+rule_files:
+  - /etc/prometheus/rules/atlas.yml
+
+evaluation_interval: 1m
+
+tests:
+  - interval: 1m
+    input_series:
+      - series: up{job="atlas-backend",instance="backend:8000"}
+        values: "0x4"
+    alert_rule_test:
+      - eval_time: 3m
+        alertname: AtlasBackendDown
+        exp_alerts:
+          - exp_labels:
+              instance: backend:8000
+              job: atlas-backend
+              severity: critical
+            exp_annotations:
+              summary: Atlas backend is unreachable
+  - interval: 1m
+    input_series:
+      - series: process_resident_memory_bytes{job="atlas-backend",instance="backend:8000"}
+        values: "500000000x12"
+    alert_rule_test:
+      - eval_time: 11m
+        alertname: AtlasBackendHighMemory
+        exp_alerts:
+          - exp_labels:
+              instance: backend:8000
+              job: atlas-backend
+              severity: warning
+            exp_annotations:
+              summary: Atlas backend resident memory exceeds 384 MiB

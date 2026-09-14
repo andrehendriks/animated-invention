@@ -1,0 +1,53 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../kubernetes
+images:
+  - name: ghcr.io/andrehendriks/animated-invention/backend
+    newName: project-atlas/backend
+    newTag: latest
+  - name: ghcr.io/andrehendriks/animated-invention/frontend
+    newName: project-atlas/frontend
+    newTag: latest
+  - name: ghcr.io/andrehendriks/animated-invention/grafana
+    newName: project-atlas/grafana
+    newTag: latest
+patches:
+  - target:
+      group: apps
+      version: v1
+      kind: Deployment
+      name: atlas-backend
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: IfNotPresent
+  - target:
+      version: v1
+      kind: Service
+      name: atlas-frontend
+    patch: |-
+      - op: replace
+        path: /spec/type
+        value: LoadBalancer
+      - op: replace
+        path: /spec/ports/0/port
+        value: 8081
+  - target:
+      group: apps
+      version: v1
+      kind: Deployment
+      name: atlas-frontend
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: IfNotPresent
+  - target:
+      group: apps
+      version: v1
+      kind: Deployment
+      name: grafana
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: IfNotPresent

@@ -1,0 +1,17 @@
+groups:
+  - name: atlas-backend
+    rules:
+      - alert: AtlasBackendDown
+        expr: up{job="atlas-backend"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: Atlas backend is unreachable
+      - alert: AtlasBackendHighMemory
+        expr: process_resident_memory_bytes{job="atlas-backend"} > 402653184
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: Atlas backend resident memory exceeds 384 MiB
