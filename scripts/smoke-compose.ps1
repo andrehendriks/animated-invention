@@ -100,7 +100,7 @@ try {
   Write-Output "Compose smoke test passed."
 } finally {
   if ($started) {
-    docker compose -p $projectName down --volumes --remove-orphans 2>&1 | Out-Host
+    & $env:ComSpec /d /c "docker compose -p $projectName down --volumes --remove-orphans 2>&1" | Out-Host
     if ($LASTEXITCODE -ne 0) {
       throw "Failed to remove the temporary Compose smoke-test resources."
     }
