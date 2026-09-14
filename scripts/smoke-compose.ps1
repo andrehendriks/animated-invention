@@ -106,9 +106,7 @@ try {
     $cleanupStartInfo.UseShellExecute = $false
     $cleanupStartInfo.RedirectStandardOutput = $true
     $cleanupStartInfo.RedirectStandardError = $true
-    foreach ($argument in @("compose", "-p", $projectName, "down", "--volumes", "--remove-orphans")) {
-      [void]$cleanupStartInfo.ArgumentList.Add($argument)
-    }
+    $cleanupStartInfo.Arguments = "compose -p $projectName down --volumes --remove-orphans"
     $cleanupProcess = [System.Diagnostics.Process]::new()
     $cleanupProcess.StartInfo = $cleanupStartInfo
     [void]$cleanupProcess.Start()
