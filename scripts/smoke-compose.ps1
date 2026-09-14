@@ -35,7 +35,7 @@ $started = $false
 
 try {
   $started = $true
-  docker compose -p $projectName up -d --build --quiet-build
+  docker compose -p $projectName up -d --build
 
   $deadline = (Get-Date).AddSeconds($TimeoutSeconds)
   $ready = $false
