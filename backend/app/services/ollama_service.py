@@ -23,7 +23,7 @@ class OllamaService:
                 {"role": "user", "content": message},
             ],
         }
-        async with httpx.AsyncClient(timeout=60) as client:
+        async with httpx.AsyncClient(timeout=settings.ollama_request_timeout_seconds) as client:
             response = await client.post(f"{settings.ollama_base_url}/api/chat", json=payload)
             response.raise_for_status()
         return response.json()["message"]["content"]

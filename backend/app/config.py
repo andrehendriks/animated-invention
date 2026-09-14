@@ -11,6 +11,7 @@ class Settings:
     api_key = os.getenv("ATLAS_API_KEY", "")
     ollama_base_url = os.getenv("ATLAS_OLLAMA_BASE_URL", "http://localhost:11434")
     ollama_model = os.getenv("ATLAS_OLLAMA_MODEL", "llama3.2")
+    ollama_request_timeout_seconds = int(os.getenv("ATLAS_OLLAMA_REQUEST_TIMEOUT_SECONDS", "180"))
     docker_enabled = os.getenv("ATLAS_DOCKER_ENABLED", "true").lower() == "true"
     kubernetes_enabled = os.getenv("ATLAS_KUBERNETES_ENABLED", "true").lower() == "true"
     synology_enabled = os.getenv("ATLAS_SYNOLOGY_ENABLED", "false").lower() == "true"
