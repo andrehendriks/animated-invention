@@ -100,8 +100,30 @@ try {
   Write-Output "Compose smoke test passed."
 } finally {
   if ($started) {
-    & $env:ComSpec /d /c "docker compose -p $projectName down --volumes --remove-orphans 2>&1" | Out-Host
-    if ($LASTEXITCODE -ne 0) {
+    $cleanupStartInfo = [System.Diagnostics.ProcessStartInfo]::new()
+    $cleanupStartInfo.FileName = "docker"
+    $cleanupStartInfo.WorkingDirectory = (Get-Location).Path
+    $cleanupStartInfo.UseShellExecute = $false
+    $cleanupStartInfo.RedirectStandardOutput = $true
+    $cleanupStartInfo.RedirectStandardError = $true
+    foreach ($argument in @("compose", "-p", $projectName, "down", "--volumes", "--remove-orphans")) {
+      [void]$cleanupStartInfo.ArgumentList.Add($argument)
+    }
+    $cleanupProcess = [System.Diagnostics.Process]::new()
+    $cleanupProcess.StartInfo = $cleanupStartInfo
+    [void]$cleanupProcess.Start()
+    $cleanupOutputTask = $cleanupProcess.StandardOutput.ReadToEndAsync()
+    $cleanupErrorTask = $cleanupProcess.StandardError.ReadToEndAsync()
+    $cleanupProcess.WaitForExit()
+    $cleanupOutput = $cleanupOutputTask.GetAwaiter().GetResult()
+    $cleanupError = $cleanupErrorTask.GetAwaiter().GetResult()
+    if ($cleanupOutput) {
+      Write-Host $cleanupOutput -NoNewline
+    }
+    if ($cleanupError) {
+      Write-Host $cleanupError -NoNewline
+    }
+    if ($cleanupProcess.ExitCode -ne 0) {
       throw "Failed to remove the temporary Compose smoke-test resources."
     }
   }
