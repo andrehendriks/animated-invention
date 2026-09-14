@@ -102,11 +102,12 @@ try {
   if ($started) {
     $cleanupStartInfo = [System.Diagnostics.ProcessStartInfo]::new()
     $cleanupStartInfo.FileName = "docker"
-    $cleanupStartInfo.WorkingDirectory = (Get-Location).Path
+    $cleanupStartInfo.WorkingDirectory = [System.IO.Path]::GetTempPath()
     $cleanupStartInfo.UseShellExecute = $false
     $cleanupStartInfo.RedirectStandardOutput = $true
     $cleanupStartInfo.RedirectStandardError = $true
-    $cleanupStartInfo.Arguments = "compose -p $projectName down --volumes --remove-orphans"
+    $composeFile = Join-Path (Get-Location).Path "docker-compose.yml"
+    $cleanupStartInfo.Arguments = "compose -f `"$composeFile`" -p $projectName down --volumes --remove-orphans"
     $cleanupProcess = [System.Diagnostics.Process]::new()
     $cleanupProcess.StartInfo = $cleanupStartInfo
     [void]$cleanupProcess.Start()
