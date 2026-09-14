@@ -13,6 +13,51 @@ $curlCommand = Get-Command curl.exe -ErrorAction SilentlyContinue | Select-Objec
 if (-not $curlCommand) {
   $curlCommand = Get-Command curl -CommandType Application -ErrorAction Stop | Select-Object -First 1
 }
+
+function Invoke-AtlasCompose {
+  param(
+    [Parameter(Mandatory)]
+    [string[]]$Arguments,
+    [switch]$DisplayOutput
+  )
+
+  $composeFile = Join-Path (Get-Location).ProviderPath "docker-compose.yml"
+  $startInfo = [System.Diagnostics.ProcessStartInfo]::new()
+  $startInfo.FileName = "docker"
+  $startInfo.WorkingDirectory = [System.IO.Path]::GetTempPath()
+  $startInfo.UseShellExecute = $false
+  $startInfo.RedirectStandardOutput = $true
+  $startInfo.RedirectStandardError = $true
+  $startInfo.Arguments = "compose -f `"$composeFile`" $($Arguments -join ' ')"
+
+  $process = [System.Diagnostics.Process]::new()
+  $process.StartInfo = $startInfo
+  [void]$process.Start()
+  $outputTask = $process.StandardOutput.ReadToEndAsync()
+  $errorTask = $process.StandardError.ReadToEndAsync()
+  $process.WaitForExit()
+  $output = $outputTask.GetAwaiter().GetResult()
+  $error = $errorTask.GetAwaiter().GetResult()
+
+  if ($DisplayOutput) {
+    if ($output) {
+      Write-Host $output -NoNewline
+    }
+    if ($error) {
+      Write-Host $error -NoNewline
+    }
+  }
+
+  if ($process.ExitCode -ne 0) {
+    $details = "$output$error".Trim()
+    throw "docker compose failed with exit code $($process.ExitCode): $details"
+  }
+
+  if (-not $DisplayOutput -and $output) {
+    Write-Output $output
+  }
+}
+
 $env:ATLAS_BACKEND_PORT = $BackendPort
 $env:ATLAS_FRONTEND_PORT = $FrontendPort
 $env:ATLAS_PROMETHEUS_PORT = $PrometheusPort
@@ -35,15 +80,13 @@ $started = $false
 
 try {
   $started = $true
-  docker compose -p $projectName up -d --build
-  if ($LASTEXITCODE -ne 0) {
-    throw "Failed to start Compose services."
-  }
+  Invoke-AtlasCompose -Arguments @("-p", $projectName, "up", "-d", "--build") -DisplayOutput
 
   $deadline = (Get-Date).AddSeconds($TimeoutSeconds)
   $ready = $false
   do {
-    $services = @(docker compose -p $projectName ps --format json | ConvertFrom-Json)
+    $servicesOutput = Invoke-AtlasCompose -Arguments @("-p", $projectName, "ps", "--format", "json")
+    $services = @($servicesOutput -split "\r?\n" | Where-Object { $_ } | ConvertFrom-Json)
     $healthCheckedServices = @("ollama", "backend", "frontend", "grafana")
     $unhealthyServices = @($healthCheckedServices | Where-Object {
       $service = $services | Where-Object Service -eq $_
@@ -58,7 +101,7 @@ try {
   } while (-not $ready -and (Get-Date) -lt $deadline)
 
   if (-not $ready) {
-    docker compose -p $projectName ps
+    Invoke-AtlasCompose -Arguments @("-p", $projectName, "ps") -DisplayOutput
     throw "Compose services did not reach the expected runtime state within $TimeoutSeconds seconds."
   }
 
@@ -100,30 +143,6 @@ try {
   Write-Output "Compose smoke test passed."
 } finally {
   if ($started) {
-    $cleanupStartInfo = [System.Diagnostics.ProcessStartInfo]::new()
-    $cleanupStartInfo.FileName = "docker"
-    $cleanupStartInfo.WorkingDirectory = [System.IO.Path]::GetTempPath()
-    $cleanupStartInfo.UseShellExecute = $false
-    $cleanupStartInfo.RedirectStandardOutput = $true
-    $cleanupStartInfo.RedirectStandardError = $true
-    $composeFile = Join-Path (Get-Location).ProviderPath "docker-compose.yml"
-    $cleanupStartInfo.Arguments = "compose -f `"$composeFile`" -p $projectName down --volumes --remove-orphans"
-    $cleanupProcess = [System.Diagnostics.Process]::new()
-    $cleanupProcess.StartInfo = $cleanupStartInfo
-    [void]$cleanupProcess.Start()
-    $cleanupOutputTask = $cleanupProcess.StandardOutput.ReadToEndAsync()
-    $cleanupErrorTask = $cleanupProcess.StandardError.ReadToEndAsync()
-    $cleanupProcess.WaitForExit()
-    $cleanupOutput = $cleanupOutputTask.GetAwaiter().GetResult()
-    $cleanupError = $cleanupErrorTask.GetAwaiter().GetResult()
-    if ($cleanupOutput) {
-      Write-Host $cleanupOutput -NoNewline
-    }
-    if ($cleanupError) {
-      Write-Host $cleanupError -NoNewline
-    }
-    if ($cleanupProcess.ExitCode -ne 0) {
-      throw "Failed to remove the temporary Compose smoke-test resources."
-    }
+    Invoke-AtlasCompose -Arguments @("-p", $projectName, "down", "--volumes", "--remove-orphans") -DisplayOutput
   }
 }
