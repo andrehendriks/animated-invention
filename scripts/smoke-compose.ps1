@@ -9,9 +9,9 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
-$curlCommand = Get-Command curl.exe -ErrorAction SilentlyContinue
+$curlCommand = @(Get-Command curl.exe -ErrorAction SilentlyContinue)[0]
 if (-not $curlCommand) {
-  $curlCommand = Get-Command curl -CommandType Application -ErrorAction Stop
+  $curlCommand = @(Get-Command curl -CommandType Application -ErrorAction Stop)[0]
 }
 $env:ATLAS_BACKEND_PORT = $BackendPort
 $env:ATLAS_FRONTEND_PORT = $FrontendPort
