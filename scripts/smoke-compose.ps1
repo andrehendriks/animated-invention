@@ -106,7 +106,7 @@ try {
     $cleanupStartInfo.UseShellExecute = $false
     $cleanupStartInfo.RedirectStandardOutput = $true
     $cleanupStartInfo.RedirectStandardError = $true
-    $composeFile = Join-Path (Get-Location).Path "docker-compose.yml"
+    $composeFile = Join-Path (Get-Location).ProviderPath "docker-compose.yml"
     $cleanupStartInfo.Arguments = "compose -f `"$composeFile`" -p $projectName down --volumes --remove-orphans"
     $cleanupProcess = [System.Diagnostics.Process]::new()
     $cleanupProcess.StartInfo = $cleanupStartInfo
