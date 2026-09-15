@@ -59,4 +59,6 @@ npm run dev
 
 See `docs\ARCHITECTURE.md`, `docs\DEPLOYMENT.md`, and
 `docs\API_REFERENCE.md` for design, deployment, endpoint, and Kubernetes
-runtime prerequisites.
+runtime prerequisites. See `docs\USER_ADMIN_GUIDE.md` for daily operation,
+updates, observability, radio and Synology configuration, verification, and
+troubleshooting.
