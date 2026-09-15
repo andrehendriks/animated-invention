@@ -61,4 +61,7 @@ See `docs\ARCHITECTURE.md`, `docs\DEPLOYMENT.md`, and
 `docs\API_REFERENCE.md` for design, deployment, endpoint, and Kubernetes
 runtime prerequisites. See `docs\USER_ADMIN_GUIDE.md` for daily operation,
 updates, observability, radio and Synology configuration, verification, and
-troubleshooting.
+troubleshooting. The documentation set also includes:
+`docs\CONFIGURATION.md`, `docs\RUNBOOKS.md`, `docs\SECURITY.md`,
+`docs\INTEGRATIONS.md`, `docs\BACKUP_AND_RECOVERY.md`, and
+`docs\CONTRIBUTING.md`.
