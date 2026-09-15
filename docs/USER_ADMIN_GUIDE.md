@@ -116,6 +116,28 @@ If the host root contains a subdirectory named `Music`, map it separately with
 host path is absent, inaccessible to Docker, or the Synology overlay was not
 included.
 
+## Docker Desktop Kubernetes diagnostics
+
+When the Docker-host kubeconfig uses a loopback API address such as
+`https://127.0.0.1:57422`, generate the backend-specific configuration:
+
+```powershell
+.\scripts\create-docker-desktop-kubeconfig.ps1
+```
+
+Set the generated path in `.env` and recreate the backend:
+
+```env
+ATLAS_KUBECONFIG_PATH=C:/path/to/animated-invention/.atlas/kubeconfig
+```
+
+```powershell
+docker compose up -d --force-recreate backend
+```
+
+This changes the API address only for the Atlas container; the host's
+`kubectl` configuration remains unchanged.
+
 ## Routine administration
 
 View service status and recent logs:

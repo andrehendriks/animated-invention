@@ -84,6 +84,7 @@ docker compose exec ollama ollama pull llama3.2
 | `ATLAS_DOCKER_ENABLED` | `true` | Enable read-only Docker inventory, stats, and logs. |
 | `ATLAS_DOCKER_GID` | `0` | Docker socket group ID for the non-root backend user. |
 | `ATLAS_KUBERNETES_ENABLED` | `true` | Enable read-only Kubernetes diagnostics. |
+| `ATLAS_KUBECONFIG_PATH` | host `KUBECONFIG` or `~/.kube/config` | Optional host path to the kubeconfig mounted into the backend. |
 | `ATLAS_SYNOLOGY_ENABLED` | `false` | Enable configured storage-mount inventory. |
 | `ATLAS_SYNOLOGY_MOUNTS` | empty | Comma-separated `name=/container/path` mount mappings. |
 | `ATLAS_MONITORING_ENABLED` | `true` | Enable Prometheus alerts and target diagnostics. |

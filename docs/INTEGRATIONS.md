@@ -38,6 +38,36 @@ docker compose exec backend kubectl get pods --all-namespaces
 
 Use a read-only credential with the least required permissions.
 
+### Docker Desktop Kubernetes
+
+Docker Desktop kubeconfigs commonly use `https://127.0.0.1:<port>`. That
+address works on the Windows host but points to the backend container itself
+when Atlas invokes `kubectl`. Create a local container-specific kubeconfig that
+uses Docker's host gateway:
+
+```powershell
+.\scripts\create-docker-desktop-kubeconfig.ps1
+```
+
+The script writes `.atlas\kubeconfig`, which is ignored by Git because it can
+contain client credentials. Set its absolute path in `.env`, then recreate the
+backend:
+
+```env
+ATLAS_KUBECONFIG_PATH=C:/path/to/animated-invention/.atlas/kubeconfig
+```
+
+```powershell
+docker compose up -d --force-recreate backend
+docker compose exec backend kubectl get events --all-namespaces
+```
+
+The generated configuration uses `host.docker.internal` for routing and
+Docker Desktop's `kubernetes` TLS server name for certificate validation. The
+script only accepts a loopback Kubernetes API address. For a remote cluster,
+keep its existing non-loopback server address and configure a least-privilege
+kubeconfig directly.
+
 ## Prometheus and Grafana
 
 The default Compose stack runs Prometheus and Grafana locally. Atlas reads

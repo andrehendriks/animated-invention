@@ -139,6 +139,16 @@ docker compose exec backend kubectl get pods --all-namespaces
 Use a least-privilege kubeconfig. Atlas needs only read permissions for the
 supported diagnostic resources.
 
+If the host command works but the backend reports a refused connection to
+`127.0.0.1:<port>`, generate a Docker Desktop container kubeconfig:
+
+```powershell
+.\scripts\create-docker-desktop-kubeconfig.ps1
+```
+
+Set the generated `.atlas\kubeconfig` path as `ATLAS_KUBECONFIG_PATH` in
+`.env`, then recreate the backend.
+
 ## Smoketest fails
 
 The smoketest uses temporary host ports. If a port is occupied, select other

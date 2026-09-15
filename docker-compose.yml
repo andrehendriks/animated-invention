@@ -74,7 +74,7 @@ services:
       - "${ATLAS_BACKEND_PORT:-8000}:8000"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ${KUBECONFIG:-~/.kube/config}:/home/atlas/.kube/config:ro
+      - ${ATLAS_KUBECONFIG_PATH:-${KUBECONFIG:-~/.kube/config}}:/home/atlas/.kube/config:ro
       - atlas-data:/data
     group_add:
       - "${ATLAS_DOCKER_GID:-0}"
