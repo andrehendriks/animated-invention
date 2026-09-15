@@ -91,6 +91,8 @@ services:
   frontend:
     build:
       context: ./frontend
+    environment:
+      ATLAS_NGINX_PROXY_TIMEOUT_SECONDS: ${ATLAS_NGINX_PROXY_TIMEOUT_SECONDS:-630}
     ports:
       - "${ATLAS_FRONTEND_PORT:-8080}:8080"
     depends_on:

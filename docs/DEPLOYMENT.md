@@ -36,7 +36,8 @@ Compose waits for Ollama before starting the backend, and waits for the
 backend's `/api/ready` check before starting the frontend.
 Atlas waits up to 180 seconds for a non-streaming Ollama chat response by
 default. Set `ATLAS_OLLAMA_REQUEST_TIMEOUT_SECONDS` in `.env` for a slower
-model or host; Nginx allows 210 seconds for the backend response.
+model or host, then set `ATLAS_NGINX_PROXY_TIMEOUT_SECONDS` above that value.
+The Nginx proxy default is 630 seconds.
 
 Run the isolated Compose smoketest to rebuild the stack, wait for all services,
 verify the frontend, its `/api/health` proxy, its read-only Docker inventory
