@@ -4,3 +4,4 @@ httpx==0.28.1
 pydantic==2.11.3
 prometheus-client==0.22.0
 pytest==8.3.5
+pytest-cov==6.2.1

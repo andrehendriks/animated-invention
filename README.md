@@ -57,6 +57,9 @@ npm ci
 npm run dev
 ```
 
+Use Node 22 or newer for frontend development to match the containerized build
+and test environment.
+
 See `docs\ARCHITECTURE.md`, `docs\DEPLOYMENT.md`, and
 `docs\API_REFERENCE.md` for design, deployment, endpoint, and Kubernetes
 runtime prerequisites. See `docs\USER_ADMIN_GUIDE.md` for daily operation,
