@@ -3,5 +3,7 @@
 __pycache__/
 *.py[cod]
 .pytest_cache/
+.coverage*
 node_modules/
 dist/
+coverage/
