@@ -17,7 +17,7 @@ jobs:
       - name: Build backend test image
         run: docker build --tag atlas-backend-test ./backend
       - name: Run backend tests
-        run: docker run --rm atlas-backend-test pytest -q
+        run: docker run --rm atlas-backend-test pytest --cov=app --cov-report=term-missing -q
       - name: Render Kubernetes manifests
         run: docker run --rm --volume "$PWD/infrastructure/kubernetes:/manifests:ro" atlas-backend-test kubectl kustomize /manifests
 

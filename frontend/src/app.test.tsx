@@ -64,6 +64,73 @@ describe("App", () => {
     expect(containers).toHaveBeenCalledOnce();
   });
 
+  it("switches between overview and interactive panels from the sidebar", async () => {
+    vi.spyOn(atlasApi, "health").mockResolvedValue({
+      status: "ok",
+      services: [{ name: "api", status: "healthy", detail: "" }],
+    });
+    vi.spyOn(atlasApi, "ready").mockResolvedValue({ status: "ready", ollama: "available" });
+
+    render(<App />);
+    await screen.findByText("System ready");
+
+    fireEvent.click(screen.getByRole("button", { name: "Automation" }));
+    expect(screen.getByRole("heading", { name: "Observe-only remediation plan" })).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: "Log analysis" }));
+    expect(screen.getByRole("heading", { name: "Local log analysis" })).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: "Incidents" }));
+    expect(screen.getByRole("heading", { name: "Incident analysis" })).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: "Docker logs" }));
+    expect(screen.getByRole("heading", { name: "Container logs" })).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: "Kubernetes pod logs" }));
+    expect(screen.getByRole("heading", { name: "Kubernetes pod logs" })).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: "Overview" }));
+    expect(screen.getByRole("heading", { name: "api" })).toBeTruthy();
+  });
+
+  it("loads container and pod logs from their dedicated panels", async () => {
+    vi.spyOn(atlasApi, "health").mockResolvedValue({
+      status: "ok",
+      services: [{ name: "api", status: "healthy", detail: "" }],
+    });
+    vi.spyOn(atlasApi, "ready").mockResolvedValue({ status: "ready", ollama: "available" });
+    const dockerLogs = vi.spyOn(atlasApi, "dockerLogs").mockResolvedValue({
+      container: "atlas",
+      tail: 200,
+      logs: "container line",
+    });
+    const podLogs = vi.spyOn(atlasApi, "kubernetesPodLogs").mockResolvedValue({
+      namespace: "default",
+      pod: "atlas-api-0",
+      tail: 200,
+      logs: "pod line",
+    });
+
+    render(<App />);
+    await screen.findByText("System ready");
+
+    fireEvent.click(screen.getByRole("button", { name: "Docker logs" }));
+    fireEvent.change(screen.getByLabelText("Container name or ID"), { target: { value: "atlas" } });
+    fireEvent.click(screen.getByRole("button", { name: "Load logs" }));
+
+    expect(await screen.findByText("atlas (last 200 lines)")).toBeTruthy();
+    expect(screen.getByText("container line")).toBeTruthy();
+    expect(dockerLogs).toHaveBeenCalledWith("atlas", 200);
+
+    fireEvent.click(screen.getByRole("button", { name: "Kubernetes pod logs" }));
+    fireEvent.change(screen.getByLabelText("Kubernetes pod name"), { target: { value: "atlas-api-0" } });
+    fireEvent.click(screen.getByRole("button", { name: "Load logs" }));
+
+    expect(await screen.findByText("default/atlas-api-0 (last 200 lines)")).toBeTruthy();
+    expect(screen.getByText("pod line")).toBeTruthy();
+    expect(podLogs).toHaveBeenCalledWith("default", "atlas-api-0", 200);
+  });
+
   it("clears local history only after confirmation", async () => {
     vi.spyOn(atlasApi, "health").mockResolvedValue({
       status: "ok",

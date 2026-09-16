@@ -8,6 +8,7 @@ RUN apt-get update \
     && chown atlas:atlas /data
 WORKDIR /app
 ENV PYTHONPATH=/app
+ENV COVERAGE_FILE=/tmp/.coverage
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY app ./app
